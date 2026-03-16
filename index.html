@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphQL Profile - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-white flex items-center justify-center px-4">
+
+  <main class="w-full max-w-md">
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold tracking-tight">Login</h1>
+        <p class="text-slate-400 mt-2">
+          Sign in with your username or email to access your profile.
+        </p>
+      </div>
+
+      <form id="login-form" class="space-y-5">
+        <div>
+          <label for="usernameOrEmail" class="block text-sm font-medium text-slate-200 mb-2">Username / Email </label>
+          <input id="usernameOrEmail" name="usernameOrEmail" type="text" required placeholder="Enter username or email"
+            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none focus:border-sky-400"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-slate-200 mb-2">Password</label>
+          <input id="password" name="password" type="password" required placeholder="Enter password" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none focus:border-sky-400"
+          />
+        </div>
+
+        <p id="error-message" class="min-h-[20px] text-sm text-red-400"></p>
+
+        <button id="login-btn" type="submit" class="w-full rounded-xl bg-sky-500 px-4 py-3 font-semibold text-slate-950 transition hover:bg-sky-400">
+          Login
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="./js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphQL Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-white">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <header class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">My Profile</h1>
+        <p class="text-slate-400 mt-1">Hello Rebooter</p>
+      </div>
+
+      <button id="logout-btn"
+        class="rounded-xl bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-400 transition">
+        Logout
+      </button>
+    </header>
+
+    <section id="loading-state" class="text-slate-400">
+      Loading profile data...
+    </section>
+
+    <section id="profile-content" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div id="user-info-card" class="rounded-2xl border border-slate-800 bg-slate-900 p-6"></div>
+        <div id="xp-card" class="rounded-2xl border border-slate-800 bg-slate-900 p-6"></div>
+        <div id="results-card" class="rounded-2xl border border-slate-800 bg-slate-900 p-6"></div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <h2 class="text-xl font-semibold mb-4">XP Progress</h2>
+          <div id="xp-chart"></div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <h2 class="text-xl font-semibold mb-4">Pass / Fail Ratio</h2>
+          <div id="pass-fail-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="profile-error" class="hidden text-red-400 mt-4"></section>
+  </div>
+
+  <script type="module" src="./js/profilePage.js"></script>
+  <script type="module" src="./js/auth.js"></script>
+</body>
+</html>
