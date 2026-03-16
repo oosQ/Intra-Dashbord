@@ -1,6 +1,6 @@
 export const AUTH_URL = "https://learn.reboot01.com/api/auth/signin";
 export const GRAPHQL_URL = "https://learn.reboot01.com/api/graphql-engine/v1/graphql";
-export const TOKEN_KEY = "";
+export const TOKEN_KEY = "jwt_token";
 
 export function saveToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
@@ -39,8 +39,11 @@ export async function loginUser(usernameOrEmail, password) {
     throw new Error("No token received from server");
   }
 
-  saveToken(token);
-  return token;
+  // Trim whitespace and remove any quotes
+  const cleanToken = token.trim().replace(/^["']|["']$/g, '');
+  
+  saveToken(cleanToken);
+  return cleanToken;
 }
 
 export function logoutUser() {
