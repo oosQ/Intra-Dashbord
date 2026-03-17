@@ -39,6 +39,7 @@ export const GET_USER_BASIC = `
       firstName
       lastName
       email
+      attrs
     }
   }
 `;
@@ -46,14 +47,16 @@ export const GET_USER_BASIC = `
 export const GET_XP_TRANSACTIONS = `
   query GetXPTransactions {
     transaction(
-      where: { type: { _eq: "xp" } }
+      where: { type: { _eq: "xp" }, object: { type: { _eq: "project" } } }
       order_by: { createdAt: asc }
     ) {
       id
       amount
       createdAt
-      path
-      type
+      object {
+        name
+        type
+      }
     }
   }
 `;
