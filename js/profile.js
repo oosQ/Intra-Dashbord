@@ -1,5 +1,5 @@
-import { GET_USER_BASIC , GET_XP_TRANSACTIONS , fetchQuery } from "./queries.js";
-import { renderUserInfo , DOM , renderXPInfo} from "./templates.js";
+import { GET_USER_BASIC , GET_XP_TRANSACTIONS , GET_AUDIT_RATIO, fetchQuery } from "./queries.js";
+import { renderUserInfo , DOM , renderXPInfo, renderAuditChart} from "./templates.js";
 
 async function loadUserInfo() {
   try {
@@ -32,8 +32,20 @@ async function loadXPInfo() {
   }
 }
 
-// Load user info on page load
+async function loadAuditRatioGraph() {
+  const auditContainer = document.getElementById("pass-fail-chart");
+  try {
+    const data = await fetchQuery(GET_AUDIT_RATIO);
+    const auditData = data.user[0];
+    renderAuditChart(auditContainer, auditData);
+
+    DOM.loadingState.classList.add("hidden");
+  } catch (error) {
+    console.error("Error loading audit ratio data:", error);
+  }
+}
 
 
 loadUserInfo();
 loadXPInfo();
+loadAuditRatioGraph();

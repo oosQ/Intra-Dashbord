@@ -47,12 +47,26 @@ export const GET_USER_BASIC = `
 export const GET_XP_TRANSACTIONS = `
   query GetXPTransactions {
     transaction(
-      where: { type: { _eq: "xp" }, object: { type: { _eq: "project" } } }
+
+      where: {
+        type: { _eq: "xp" }
+        _or: [
+          { object: { type: { _eq: "project" } } }
+          { _and: [
+              { object: { type: { _eq: "exercise" } } }
+              { path: { _ilike: "%/checkpoint/%" } }
+            ]
+          }
+          { path: { _regex: "/bahrain/bh-module/piscine-(js|rust)$" } }
+        ]
+      }
+
       order_by: { createdAt: asc }
     ) {
       id
       amount
       createdAt
+      path
       object {
         name
         type
@@ -71,3 +85,15 @@ export const GET_RESULTS = `
     }
   }
 `;
+
+export const GET_AUDIT_RATIO = `
+  query GetAuditRatio {
+    user {
+      auditRatio
+      totalUp
+      totalUpBonus
+      totalDown
+    }
+  }
+`;
+
