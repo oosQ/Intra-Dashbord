@@ -1,9 +1,9 @@
-import { GET_USER_BASIC , GET_XP_TRANSACTIONS , GET_AUDIT_RATIO, fetchQuery } from "./queries.js";
-import { renderUserInfo , DOM , renderXPInfo, renderAuditChart} from "./templates.js";
+import { QUERIES, fetchQuery } from "./queries.js";
+import { renderUserInfo , DOM , renderXPInfo, renderAuditChart, renderXPProgressChart} from "./templates.js";
 
 async function loadUserInfo() {
   try {
-    const data = await fetchQuery(GET_USER_BASIC);
+    const data = await fetchQuery(QUERIES.userDetails);
     const user = data.user[0];
     renderUserInfo(user);
     
@@ -21,7 +21,7 @@ async function loadUserInfo() {
 
 async function loadXPInfo() {
   try {
-    const data = await fetchQuery(GET_XP_TRANSACTIONS);
+    const data = await fetchQuery(QUERIES.userAllXP);
     const transactions = data.transaction;
     renderXPInfo(transactions);
 
@@ -35,7 +35,7 @@ async function loadXPInfo() {
 async function loadAuditRatioGraph() {
   const auditContainer = document.getElementById("pass-fail-chart");
   try {
-    const data = await fetchQuery(GET_AUDIT_RATIO);
+    const data = await fetchQuery(QUERIES.auditRatio);
     const auditData = data.user[0];
     renderAuditChart(auditContainer, auditData);
 
@@ -46,6 +46,24 @@ async function loadAuditRatioGraph() {
 }
 
 
+async function loadXPProgressGraph() {
+  const xpChartContainer = document.getElementById("xp-chart");
+  try {
+    const [xpData, levelData] = await Promise.all([
+      fetchQuery(QUERIES.userAllXP),
+      fetchQuery(QUERIES.userLevel)
+    ]);
+    const transactions = xpData.transaction;
+    const level = levelData.transaction[0]?.amount || 0;
+    renderXPProgressChart(xpChartContainer, transactions, level);
+  } catch (error) {
+    console.error("Error loading XP progress graph:", error);
+    xpChartContainer.innerHTML = '<p class="text-red-400 text-center py-8">Failed to load XP progress</p>';
+  }
+}
+
 loadUserInfo();
 loadXPInfo();
+loadXPProgressGraph();
+loadAuditRatioGraph();
 loadAuditRatioGraph();

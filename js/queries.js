@@ -29,7 +29,9 @@ export async function fetchQuery(query, variables = {}) {
   }
 
   return result.data;
-}
+}        
+
+
 
 export const GET_USER_BASIC = `
   query GetUserBasic {
@@ -40,6 +42,18 @@ export const GET_USER_BASIC = `
       lastName
       email
       attrs
+    }
+  }
+`;
+
+export const GET_USER_LEVEL = `
+  query GetUserLevel {
+    transaction(
+      order_by: { amount: desc }
+      limit: 1
+      where: { type: { _eq: "level" }, path: { _like: "/bahrain/bh-module%" } }
+    ) {
+      amount
     }
   }
 `;
@@ -97,3 +111,10 @@ export const GET_AUDIT_RATIO = `
   }
 `;
 
+export const QUERIES = {
+  userDetails : GET_USER_BASIC,
+  userAllXP : GET_XP_TRANSACTIONS,
+  results : GET_RESULTS,
+  auditRatio : GET_AUDIT_RATIO,
+  userLevel : GET_USER_LEVEL
+} 

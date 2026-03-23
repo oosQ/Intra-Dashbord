@@ -1,4 +1,7 @@
 import { calculateTotalXP } from "./utils.js";
+import { renderAuditChart, renderXPProgressChart } from "./graphs.js";
+
+export { renderAuditChart, renderXPProgressChart };
 
 export const DOM = {
   userCard: document.getElementById("user-info-card"),
@@ -47,142 +50,77 @@ export function renderXPInfo(transactions) {
 }
 
 export function renderUserInfo(user) {
+  const formatAddress = () => {
+    const parts = [user.attrs.addressStreet, user.attrs.addressCity, user.attrs.addressCountry].filter(Boolean);
+    return parts.length ? parts.join(', ') : 'N/A';
+  };
+
   DOM.userCard.innerHTML = `
-    <h2 class="text-xl font-semibold mb-4">User Info</h2>
-    <div class="space-y-2 text-slate-300">
-      <p>
-        <span class="text-slate-400">ID:</span>
-        ${user.id}
-      </p>
-      <p>
-        <span class="text-slate-400">Login:</span>
-        ${user.login}
-      </p>
-      <p>
-        <span class="text-slate-400">Full Name:</span>
-        ${user.firstName} ${user.lastName}
-      </p>
-      <p>
-        <span class="text-slate-400">Email:</span>
-        ${user.email}
-      </p>
+    <div class="space-y-4">
+      <!-- Profile Header -->
+      <div class="text-center pb-4 border-b border-slate-700">
+        <div class="w-20 h-20 mx-auto mb-3 bg-gradient-to-br from-sky-400 to-purple-500 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-3xl text-white"></i>
+        </div>
+        <div class="text-xs text-slate-500 mb-1">#${user.id}</div>
+        <h2 class="text-2xl font-bold text-white mb-1">${user.firstName} ${user.lastName}</h2>
+        <div class="text-sm text-slate-400"><i class="fas fa-at text-sky-400"></i> ${user.login}</div>
+      </div>
 
-      <p>
-        <span class="text-slate-400">Qualification:</span>
-        ${user.attrs.qualification || "N/A"}
-      </p>
-
-      <p>
-        <span class="text-slate-400">Degree:</span>
-        ${user.attrs.Degree || "N/A"}
-      </p>
-
-      <p>
-        <span class="text-slate-400">Job Title:</span>
-        ${user.attrs.jobtitle || "N/A"}
-      </p>
-
-      <p>
-        <span class="text-slate-400">CPR:</span>
-        ${user.attrs.CPRnumber || "N/A"}
-      </p>
-
-      <p>
-        <span class="text-slate-400">Phone:</span>
-        +973 ${user.attrs.PhoneNumber || "N/A"}
-      </p>
-
-      <p>
-        <span class="text-slate-400">Address:</span>
-        ${user.attrs.addressStreet || ""} ${user.attrs.addressCity || ""} ${user.attrs.addressCountry || ""}
-      </p>
-
-      <p>
-        <span class="text-slate-400">Date of Birth:</span>
-        ${user.attrs.dateOfBirth ? new Date(user.attrs.dateOfBirth).toLocaleDateString() : "N/A"}
-      </p>
-
-    </div>
-  `;
-}
-
-export function renderAuditChart(container, data) {
-  const { totalUp, totalDown, auditRatio, totalUpBonus } = data;
-  
-  const formatBytes = (bytes) => {
-    const mb = bytes / 1000000;
-    const kb = bytes / 1000;
-    return mb >= 0.01 ? `${mb.toFixed(2)} MB` : `${kb.toFixed(2)} kB`;
-  };
-
-  const getRatioMessage = (ratio) => {
-    if (ratio >= 1.5) return "Outstanding! 🌟";
-    if (ratio >= 1.2) return "Almost perfect!";
-    if (ratio >= 1.0) return "Great job!";
-    if (ratio >= 0.8) return "Keep going!";
-    return "Need more audits";
-  };
-  
-  const maxValue = Math.max(totalUp + totalUpBonus, totalDown, 1);
-  const upHeight = (totalUp / maxValue) * 120;
-  const bonusHeight = (totalUpBonus / maxValue) * 120;
-  const downHeight = (totalDown / maxValue) * 120;
-
-  container.innerHTML = `
-    <div class="space-y-6">
-      <!-- Bar Chart -->
-      <svg viewBox="0 0 380 220" class="w-full">
-        <!-- Y-axis -->
-        <line x1="50" y1="20" x2="50" y2="160" stroke="#475569" stroke-width="2"/>
-        
-        <!-- X-axis -->
-        <line x1="50" y1="160" x2="320" y2="160" stroke="#475569" stroke-width="2"/>
-        
-        <!-- Grid lines -->
-        ${[0, 1, 2, 3, 4].map(i => {
-          const y = 160 - (i * 30);
-          const value = ((maxValue / 1000000) * (i / 4)).toFixed(1);
-          return `
-            <line x1="50" y1="${y}" x2="320" y2="${y}" stroke="#334155" stroke-width="1" opacity="0.8" stroke-dasharray="3,3"/>
-            <text x="40" y="${y + 4}" fill="#64748b" font-size="10" text-anchor="end">${value}</text>
-          `;
-        }).join('')}
-        
-        <!-- Y-axis label -->
-        <text x="15" y="90" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(-90, 15, 90)">MB</text>
-        
-        <!-- Done Bar (base) -->
-        <rect x="100" y="${160 - upHeight - bonusHeight}" width="60" height="${upHeight}" fill="#10b981" rx="4"/>
-        
-        <!-- Bonus Bar (stacked on top) -->
-        <rect x="100" y="${160 - bonusHeight}" width="60" height="${bonusHeight}" fill="#fbbf24" rx="4"/>
-        
-        <!-- Received Bar -->
-        <rect x="220" y="${160 - downHeight}" width="60" height="${downHeight}" fill="#ef4444" rx="4"/>
-        
-        <!-- Labels -->
-        <text x="130" y="180" fill="#94a3b8" font-size="13" font-weight="600" text-anchor="middle">Done</text>
-        <text x="250" y="180" fill="#94a3b8" font-size="13" font-weight="600" text-anchor="middle">Received</text>
-      </svg>
-
-      <!-- Stats Display -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="text-center p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-          <div class="text-slate-400 text-sm mb-2">Done</div>
-          <div class="text-2xl font-bold text-emerald-400">
-            ${formatBytes(totalUp)}<span class="text-amber-400 text-lg"> + ${formatBytes(totalUpBonus)}</span>
+      <!-- Contact Info -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-envelope text-sky-400 w-5"></i>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs text-slate-500">Email</div>
+            <div class="text-sm text-slate-200 truncate">${user.email}</div>
           </div>
         </div>
-        <div class="text-center p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-          <div class="text-slate-400 text-sm mb-2">Received</div>
-          <div class="text-2xl font-bold text-rose-400">${formatBytes(totalDown)}</div>
+
+        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-phone text-green-400 w-5"></i>
+          <div class="flex-1">
+            <div class="text-xs text-slate-500">Phone</div>
+            <div class="text-sm text-slate-200">+973 ${user.attrs.PhoneNumber || 'N/A'}</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-location-dot text-red-400 w-5"></i>
+          <div class="flex-1">
+            <div class="text-xs text-slate-500">Address</div>
+            <div class="text-sm text-slate-200">${formatAddress()}</div>
+          </div>
         </div>
       </div>
 
-      <!-- Audit Ratio -->
-      <div class="text-center p-5 bg-sky-500/10 rounded-lg border border-sky-500/30">
-        <div class="text-5xl font-bold text-sky-400">${auditRatio.toFixed(1)} <span class="text-lg text-slate-300 font-medium ml-2">${getRatioMessage(auditRatio)}</span></div>
+      <!-- Additional Info -->
+      <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-700">
+        <div class="p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-briefcase text-amber-400 text-xs mb-1"></i>
+          <div class="text-xs text-slate-500">Job Title</div>
+          <div class="text-sm text-slate-200 font-medium">${user.attrs.jobtitle || 'N/A'}</div>
+        </div>
+        
+        <div class="p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-graduation-cap text-purple-400 text-xs mb-1"></i>
+          <div class="text-xs text-slate-500">Education</div>
+          <div class="text-sm text-slate-200 font-medium">${user.attrs.Degree || user.attrs.qualification || 'N/A'}</div>
+        </div>
+
+        <div class="p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-id-card text-blue-400 text-xs mb-1"></i>
+          <div class="text-xs text-slate-500">CPR</div>
+          <div class="text-sm text-slate-200 font-medium">${user.attrs.CPRnumber || 'N/A'}</div>
+        </div>
+
+        <div class="p-3 bg-slate-800/30 rounded-lg">
+          <i class="fas fa-cake-candles text-pink-400 text-xs mb-1"></i>
+          <div class="text-xs text-slate-500">Birthday</div>
+          <div class="text-sm text-slate-200 font-medium">${user.attrs.dateOfBirth ? new Date(user.attrs.dateOfBirth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</div>
+        </div>
       </div>
     </div>
   `;
 }
+
