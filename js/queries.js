@@ -89,6 +89,26 @@ export const GET_XP_TRANSACTIONS = `
   }
 `;
 
+export const GET_XP_PROJECTS = `
+  query GetXPProjects {
+    transaction(
+      where: {
+        type: { _eq: "xp" }
+        object: { type: { _eq: "project" } }
+        path: { _like: "/bahrain/bh-module/%" }
+      }
+      order_by: { createdAt: asc }
+    ) {
+      id
+      amount
+      createdAt
+      object {
+        name
+      }
+    }
+  }
+`;
+
 export const GET_RESULTS = `
   query GetResults {
     result(order_by: { createdAt: desc }) {
@@ -114,6 +134,7 @@ export const GET_AUDIT_RATIO = `
 export const QUERIES = {
   userDetails : GET_USER_BASIC,
   userAllXP : GET_XP_TRANSACTIONS,
+  xpProjects : GET_XP_PROJECTS,
   results : GET_RESULTS,
   auditRatio : GET_AUDIT_RATIO,
   userLevel : GET_USER_LEVEL

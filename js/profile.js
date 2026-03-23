@@ -49,13 +49,13 @@ async function loadAuditRatioGraph() {
 async function loadXPProgressGraph() {
   const xpChartContainer = document.getElementById("xp-chart");
   try {
-    const [xpData, levelData] = await Promise.all([
-      fetchQuery(QUERIES.userAllXP),
+    const [projectData, levelData] = await Promise.all([
+      fetchQuery(QUERIES.xpProjects),
       fetchQuery(QUERIES.userLevel)
     ]);
-    const transactions = xpData.transaction;
+    const projects = projectData.transaction;
     const level = levelData.transaction[0]?.amount || 0;
-    renderXPProgressChart(xpChartContainer, transactions, level);
+    renderXPProgressChart(xpChartContainer, projects, level);
   } catch (error) {
     console.error("Error loading XP progress graph:", error);
     xpChartContainer.innerHTML = '<p class="text-red-400 text-center py-8">Failed to load XP progress</p>';

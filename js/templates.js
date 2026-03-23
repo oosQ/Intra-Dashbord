@@ -13,18 +13,16 @@ export const DOM = {
 
 
 export function renderXPInfo(transactions) {
-  const totalXP = calculateTotalXP(transactions);
   const toKB = (bytes) => (bytes / 1000).toFixed(1);
   
   DOM.xpCard.innerHTML = `
     <div class="space-y-4">
-      <!-- Total XP Display -->
+      <!-- Completed Projects Display -->
       <div class="text-center p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/30">
-        <div class="text-sm text-slate-400 mb-2">Total XP Earned</div>
+        <div class="text-sm text-slate-400 mb-2">Completed Projects</div>
         <div class="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          ${toKB(totalXP)} kB
+          ${transactions.length}
         </div>
-        <div class="text-slate-400 text-xs mt-2">${transactions.length} projects completed</div>
       </div>
 
       <!-- Transactions List -->

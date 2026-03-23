@@ -79,84 +79,139 @@ export function renderAuditChart(container, data) {
   `;
 }
 
-export function renderXPProgressChart(container, transactions, currentLevel = 0) {
-  if (!transactions || transactions.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 text-center py-8">No XP data available</p>';
+export function renderXPProgressChart(container, projects, currentLevel = 0) {
+  if (!projects || projects.length === 0) {
+    container.innerHTML = '<p class="text-slate-400 text-center py-8">No project data available</p>';
     return;
   }
 
-  // Calculate cumulative XP
+  // Calculate cumulative XP for each project
   let cumulativeXP = 0;
-  const dataPoints = transactions.map(tx => {
-    cumulativeXP += tx.amount;
-    return { date: new Date(tx.createdAt), xp: cumulativeXP };
+  const dataPoints = projects.map(project => {
+    cumulativeXP += project.amount;
+    return {
+      name: project.object.name,
+      date: new Date(project.createdAt),
+      xp: cumulativeXP,
+      earned: project.amount
+    };
   });
 
-  const maxXP = Math.max(...dataPoints.map(d => d.xp));
+  const maxXP = dataPoints[dataPoints.length - 1].xp;
   const minDate = dataPoints[0].date;
   const maxDate = dataPoints[dataPoints.length - 1].date;
   const dateRange = maxDate - minDate;
 
-  const w = 800, h = 300, p = { top: 20, right: 30, bottom: 40, left: 60 };
-  const cw = w - p.left - p.right, ch = h - p.top - p.bottom;
+  // SVG dimensions
+  const w = 800, h = 300;
+  const padding = { top: 20, right: 30, bottom: 40, left: 60 };
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
 
-  // Line path
-  const line = dataPoints.map((pt, i) => {
-    const x = p.left + (cw * ((pt.date - minDate) / dateRange));
-    const y = p.top + ch - (ch * (pt.xp / maxXP));
-    return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
-  }).join(' ');
+  // Helper to calculate coordinates
+  const getX = (date) => padding.left + (chartW * ((date - minDate) / dateRange));
+  const getY = (xp) => padding.top + chartH - (chartH * (xp / maxXP));
 
-  // Y-axis labels
+  // Generate line path
+  const linePath = dataPoints.map((pt, i) => 
+    `${i === 0 ? 'M' : 'L'} ${getX(pt.date)} ${getY(pt.xp)}`
+  ).join(' ');
+
+  // Y-axis labels (XP values)
   const yLabels = Array.from({ length: 6 }, (_, i) => {
-    const val = (maxXP / 5) * i;
-    return { label: (val / 1000).toFixed(0), y: p.top + ch - (ch * (val / maxXP)) };
+    const value = (maxXP / 5) * i;
+    return { label: (value / 1000).toFixed(0), y: getY(value) };
   });
 
-  // X-axis labels - deduplicate dates
+  // X-axis labels (dates) - deduplicate
   const xLabels = [];
-  const seenLabels = new Set();
-  Array.from({ length: 7 }, (_, i) => {
+  const seenDates = new Set();
+  for (let i = 0; i < 7; i++) {
     const idx = Math.floor((dataPoints.length - 1) * (i / 6));
-    const pt = dataPoints[idx];
-    const label = pt.date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-    if (!seenLabels.has(label)) {
-      seenLabels.add(label);
-      xLabels.push({ label, x: p.left + (cw * ((pt.date - minDate) / dateRange)) });
+    const point = dataPoints[idx];
+    const label = point.date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    if (!seenDates.has(label)) {
+      seenDates.add(label);
+      xLabels.push({ label, x: getX(point.date) });
     }
-  });
+  }
+
+  // Create tooltip element
+  const tooltipId = 'xp-tooltip-' + Date.now();
 
   container.innerHTML = `
     <div class="flex flex-col h-full">
-      <svg viewBox="0 0 ${w} ${h}" class="w-full flex-1">
-        <defs>
-          <linearGradient id="xpGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
-            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
+      <div class="relative">
+        <svg viewBox="0 0 ${w} ${h}" class="w-full">
+          <defs>
+            <linearGradient id="xpGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          
+          <!-- Grid lines -->
+          ${yLabels.map(({ y }) => 
+            `<line x1="${padding.left}" y1="${y}" x2="${w - padding.right}" y2="${y}" stroke="#334155" stroke-dasharray="3,3" opacity="0.3"/>`
+          ).join('')}
+          
+          <!-- Area fill -->
+          <path d="${linePath} L ${w - padding.right} ${padding.top + chartH} L ${padding.left} ${padding.top + chartH} Z" fill="url(#xpGrad)"/>
+          
+          <!-- Line -->
+          <path d="${linePath}" stroke="#8b5cf6" stroke-width="2.5" fill="none"/>
+          
+          <!-- Data points -->
+          ${dataPoints.map((pt) => {
+            const cx = getX(pt.date);
+            const cy = getY(pt.xp);
+            const escapedName = pt.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const dateStr = pt.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            return `
+              <circle 
+                cx="${cx}" cy="${cy}" r="4" 
+                fill="#8b5cf6" stroke="#1e293b" stroke-width="2"
+                style="cursor: pointer; transition: all 0.2s;"
+                onmouseenter="this.setAttribute('r', '6'); this.setAttribute('fill', '#a78bfa'); document.getElementById('${tooltipId}').style.display='block'; document.getElementById('${tooltipId}').innerHTML='<strong>${escapedName}</strong><br/>+${(pt.earned / 1000).toFixed(1)} kB<br/>${dateStr}'"
+                onmouseleave="this.setAttribute('r', '4'); this.setAttribute('fill', '#8b5cf6'); document.getElementById('${tooltipId}').style.display='none'"
+              />
+            `;
+          }).join('')}
+          
+          <!-- Axes -->
+          <line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${padding.top + chartH}" stroke="#475569" stroke-width="2"/>
+          <line x1="${padding.left}" y1="${padding.top + chartH}" x2="${w - padding.right}" y2="${padding.top + chartH}" stroke="#475569" stroke-width="2"/>
+          
+          <!-- Y-axis labels -->
+          ${yLabels.map(({ label, y }) => 
+            `<text x="${padding.left - 10}" y="${y + 4}" fill="#94a3b8" font-size="11" text-anchor="end">${label}</text>`
+          ).join('')}
+          
+          <!-- X-axis labels -->
+          ${xLabels.map(({ label, x }) => 
+            `<text x="${x}" y="${padding.top + chartH + 25}" fill="#94a3b8" font-size="10" text-anchor="middle">${label}</text>`
+          ).join('')}
+          
+          <!-- Y-axis label -->
+          <text x="${padding.left - 45}" y="${h / 2}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(-90, ${padding.left - 45}, ${h / 2})">XP (kB)</text>
+        </svg>
         
-        ${yLabels.map(({ y }) => `<line x1="${p.left}" y1="${y}" x2="${w - p.right}" y2="${y}" stroke="#334155" stroke-dasharray="3,3" opacity="0.3"/>`).join('')}
-        
-        <path d="${line} L ${w - p.right} ${p.top + ch} L ${p.left} ${p.top + ch} Z" fill="url(#xpGrad)"/>
-        <path d="${line}" stroke="#8b5cf6" stroke-width="2.5" fill="none"/>
-        
-        <line x1="${p.left}" y1="${p.top}" x2="${p.left}" y2="${p.top + ch}" stroke="#475569" stroke-width="2"/>
-        <line x1="${p.left}" y1="${p.top + ch}" x2="${w - p.right}" y2="${p.top + ch}" stroke="#475569" stroke-width="2"/>
-        
-        ${yLabels.map(({ label, y }) => `<text x="${p.left - 10}" y="${y + 4}" fill="#94a3b8" font-size="11" text-anchor="end">${label}</text>`).join('')}
-        ${xLabels.map(({ label, x }) => `<text x="${x}" y="${p.top + ch + 25}" fill="#94a3b8" font-size="10" text-anchor="middle">${label}</text>`).join('')}
-        
-        <text x="${p.left - 45}" y="${h / 2}" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(-90, ${p.left - 45}, ${h / 2})">XP (kB)</text>
-      </svg>
+        <!-- Tooltip -->
+        <div id="${tooltipId}" class="absolute top-4 right-4 bg-slate-800 border border-purple-500/50 rounded-lg px-4 py-2 text-sm text-slate-200 shadow-lg pointer-events-none" style="display: none;"></div>
+      </div>
       
+      <!-- Stats -->
       <div class="flex justify-between items-center mt-4 p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
         <div>
           <div class="text-sm text-slate-400">Current XP</div>
           <div class="text-2xl font-bold text-purple-400">${(maxXP / 1000).toFixed(1)} kB</div>
         </div>
+        <div class="text-center">
+          <div class="text-sm text-slate-400">Projects</div>
+          <div class="text-2xl font-bold text-slate-200">${projects.length}</div>
+        </div>
         <div class="text-right">
-          <div class="text-sm text-slate-400">Current Level</div>
+          <div class="text-sm text-slate-400">Level</div>
           <div class="text-2xl font-bold text-slate-200">${currentLevel}</div>
         </div>
       </div>
