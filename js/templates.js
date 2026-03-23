@@ -1,4 +1,5 @@
 import { renderAuditChart, renderXPProgressChart } from "./graphs.js";
+import { toKB, formatDate } from "./utils.js";
 export { renderAuditChart, renderXPProgressChart };
 
 export const DOM = {
@@ -11,7 +12,8 @@ export const DOM = {
 
 
 export function renderXPInfo(transactions) {
-  const toKB = (bytes) => (bytes / 1000).toFixed(1);
+  // Sort by amount descending
+  const sortedTransactions = [...transactions].sort((a, b) => b.amount - a.amount);
   
   DOM.xpCard.innerHTML = `
     <div class="space-y-4">
@@ -27,16 +29,16 @@ export function renderXPInfo(transactions) {
       <div>
         <h3 class="text-sm font-semibold text-slate-300 mb-3 flex items-center">
           <span class="w-2 h-2 bg-[#10CFC9] rounded-full mr-2"></span>
-          Recent XP Transactions
+          Top XP Transactions
         </h3>
         <ul class="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800">
-          ${transactions.slice().reverse().map(tx => `
+          ${sortedTransactions.map(tx => `
             <li class="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-[#10CFC9]/30 transition-colors">
               <div class="flex justify-between items-start mb-1">
                 <span class="font-medium text-slate-200 text-sm">${tx.object.name}</span>
                 <span class="text-[#10CFC9] font-bold text-sm">${toKB(tx.amount)} kB</span>
               </div>
-              <div class="text-xs text-slate-500">${new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+              <div class="text-xs text-slate-500">${formatDate(tx.createdAt)}</div>
             </li>
           `).join("")}
         </ul>
@@ -116,7 +118,7 @@ export function renderUserInfo(user) {
         <div class="p-3 bg-slate-800/30 rounded-lg">
           <i class="fas fa-cake-candles text-pink-400 text-xs mb-1"></i>
           <div class="text-xs text-slate-500">Birthday</div>
-          <div class="text-sm text-slate-200 font-medium">${user.attrs.dateOfBirth ? new Date(user.attrs.dateOfBirth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</div>
+          <div class="text-sm text-slate-200 font-medium">${user.attrs.dateOfBirth ? formatDate(user.attrs.dateOfBirth) : 'N/A'}</div>
         </div>
       </div>
     </div>

@@ -1,19 +1,7 @@
+import { formatBytes, getRatioMessage, calculateCumulativeXP, deduplicateDateLabels, formatDate, toKB, escapeHtml } from './utils.js';
+
 export function renderAuditChart(container, data) {
   const { totalUp, totalDown, auditRatio, totalUpBonus } = data;
-  
-  const formatBytes = (bytes) => {
-    const mb = bytes / 1000000;
-    const kb = bytes / 1000;
-    return mb >= 0.01 ? `${mb.toFixed(2)} MB` : `${kb.toFixed(2)} kB`;
-  };
-
-  const getRatioMessage = (ratio) => {
-    if (ratio >= 1.5) return "Outstanding! ";
-    if (ratio >= 1.2) return "Almost perfect!";
-    if (ratio >= 1.0) return "Great job!";
-    if (ratio >= 0.8) return "Keep going!";
-    return "Need more audits";
-  };
   
   const maxValue = Math.max(totalUp + totalUpBonus, totalDown, 1);
   const upHeight = (totalUp / maxValue) * 180;
@@ -88,16 +76,7 @@ export function renderXPProgressChart(container, transactions, currentLevel = 0)
   }
 
   // Calculate cumulative XP for each transaction
-  let cumulativeXP = 0;
-  const dataPoints = transactions.map(tx => {
-    cumulativeXP += tx.amount;
-    return {
-      name: tx.object.name,
-      date: new Date(tx.createdAt),
-      xp: cumulativeXP,
-      earned: tx.amount
-    };
-  });
+  const dataPoints = calculateCumulativeXP(transactions);
 
   const maxXP = dataPoints[dataPoints.length - 1].xp;
   const minDate = dataPoints[0].date;
@@ -126,17 +105,7 @@ export function renderXPProgressChart(container, transactions, currentLevel = 0)
   });
 
   // X-axis labels (dates) - deduplicate
-  const xLabels = [];
-  const seenDates = new Set();
-  for (let i = 0; i < 7; i++) {
-    const idx = Math.floor((dataPoints.length - 1) * (i / 6));
-    const point = dataPoints[idx];
-    const label = point.date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-    if (!seenDates.has(label)) {
-      seenDates.add(label);
-      xLabels.push({ label, x: getX(point.date) });
-    }
-  }
+  const xLabels = deduplicateDateLabels(dataPoints, getX);
 
   // Create tooltip element
   const tooltipId = 'xp-tooltip-' + Date.now();
@@ -167,8 +136,8 @@ export function renderXPProgressChart(container, transactions, currentLevel = 0)
           ${dataPoints.map((pt) => {
             const cx = getX(pt.date);
             const cy = getY(pt.xp);
-            const escapedName = pt.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            const dateStr = pt.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const escapedName = escapeHtml(pt.name);
+            const dateStr = formatDate(pt.date);
             return `
               <circle 
                 cx="${cx}" cy="${cy}" r="4" 

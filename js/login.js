@@ -11,11 +11,16 @@ if (isAuthenticated()) {
 }
 
 // Toggle password visibility
-togglePasswordBtn.addEventListener("click", () => {
-  const isPassword = passwordInput.type === "password";
-  passwordInput.type = isPassword ? "text" : "password";
-  passwordIcon.className = isPassword ? "fas fa-eye-slash" : "fas fa-eye";
-});
+if (togglePasswordBtn) {
+  togglePasswordBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isPassword = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    passwordIcon.classList.remove("fa-eye", "fa-eye-slash");
+    passwordIcon.classList.add(isPassword ? "fa-eye-slash" : "fa-eye");
+  });
+}
 
 // Login form submit handler
 loginForm.addEventListener("submit", async (event) => {
