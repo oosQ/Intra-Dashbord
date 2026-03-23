@@ -1,4 +1,4 @@
-import { getToken, GRAPHQL_URL } from "./auth.js";
+import { getToken, GRAPHQL_URL, removeToken } from "./auth.js";
 
 export async function fetchQuery(query, variables = {}) {
   const token = getToken();
@@ -25,7 +25,16 @@ export async function fetchQuery(query, variables = {}) {
   }
 
   if (result.errors && result.errors.length > 0) {
-    throw new Error(result.errors[0].message || "Error in GraphQL query");
+    const errorMessage = result.errors[0].message || "Error in GraphQL query";
+    
+    // Check if JWT has expired
+    if (errorMessage.includes("JWTExpired") || errorMessage.includes("JWT") && errorMessage.includes("expired")) {
+      removeToken();
+      window.location.href = "/index.html";
+      throw new Error("Your session has expired. Please log in again.");
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return result.data;
@@ -89,26 +98,6 @@ export const GET_XP_TRANSACTIONS = `
   }
 `;
 
-export const GET_XP_PROJECTS = `
-  query GetXPProjects {
-    transaction(
-      where: {
-        type: { _eq: "xp" }
-        object: { type: { _eq: "project" } }
-        path: { _like: "/bahrain/bh-module/%" }
-      }
-      order_by: { createdAt: asc }
-    ) {
-      id
-      amount
-      createdAt
-      object {
-        name
-      }
-    }
-  }
-`;
-
 export const GET_RESULTS = `
   query GetResults {
     result(order_by: { createdAt: desc }) {
@@ -134,7 +123,6 @@ export const GET_AUDIT_RATIO = `
 export const QUERIES = {
   userDetails : GET_USER_BASIC,
   userAllXP : GET_XP_TRANSACTIONS,
-  xpProjects : GET_XP_PROJECTS,
   results : GET_RESULTS,
   auditRatio : GET_AUDIT_RATIO,
   userLevel : GET_USER_LEVEL

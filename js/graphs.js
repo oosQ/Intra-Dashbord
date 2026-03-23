@@ -16,24 +16,25 @@ export function renderAuditChart(container, data) {
   };
   
   const maxValue = Math.max(totalUp + totalUpBonus, totalDown, 1);
-  const upHeight = (totalUp / maxValue) * 120;
-  const bonusHeight = (totalUpBonus / maxValue) * 120;
-  const downHeight = (totalDown / maxValue) * 120;
+  const upHeight = (totalUp / maxValue) * 180;
+  const bonusHeight = (totalUpBonus / maxValue) * 180;
+  const downHeight = (totalDown / maxValue) * 180;
 
   container.innerHTML = `
-    <div class="space-y-6">
+    <div class="flex flex-col h-full">
       <!-- Bar Chart -->
-      <svg viewBox="0 0 380 220" class="w-full">
-        <!-- Y-axis -->
-        <line x1="50" y1="20" x2="50" y2="160" stroke="#475569" stroke-width="2"/>
+      <div class="flex-1 min-h-0">
+        <svg viewBox="0 0 380 280" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+          <!-- Y-axis -->
+          <line x1="50" y1="20" x2="50" y2="200" stroke="#475569" stroke-width="2"/>
         
         <!-- X-axis -->
-        <line x1="50" y1="160" x2="320" y2="160" stroke="#475569" stroke-width="2"/>
+        <line x1="50" y1="200" x2="320" y2="200" stroke="#475569" stroke-width="2"/>
         
         <!-- Grid lines -->
-        ${[0, 1, 2, 3, 4].map(i => {
-          const y = 160 - (i * 30);
-          const value = ((maxValue / 1000000) * (i / 4)).toFixed(1);
+        ${[0, 1, 2, 3, 4, 5].map(i => {
+          const y = 200 - (i * 36);
+          const value = ((maxValue / 1000000) * (i / 5)).toFixed(1);
           return `
             <line x1="50" y1="${y}" x2="320" y2="${y}" stroke="#334155" stroke-width="1" opacity="0.8" stroke-dasharray="3,3"/>
             <text x="40" y="${y + 4}" fill="#64748b" font-size="10" text-anchor="end">${value}</text>
@@ -41,59 +42,60 @@ export function renderAuditChart(container, data) {
         }).join('')}
         
         <!-- Y-axis label -->
-        <text x="15" y="90" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(-90, 15, 90)">MB</text>
+        <text x="15" y="110" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(-90, 15, 110)">MB</text>
         
         <!-- Done Bar (base) -->
-        <rect x="100" y="${160 - upHeight - bonusHeight}" width="60" height="${upHeight}" fill="#10b981" rx="4"/>
+        <rect x="100" y="${200 - upHeight}" width="60" height="${upHeight}" fill="#10CFC9" rx="4"/>
         
         <!-- Bonus Bar (stacked on top) -->
-        <rect x="100" y="${160 - bonusHeight}" width="60" height="${bonusHeight}" fill="#fbbf24" rx="4"/>
+        <rect x="100" y="${200 - upHeight - bonusHeight}" width="60" height="${bonusHeight}" fill="#fbbf24" rx="4"/>
         
         <!-- Received Bar -->
-        <rect x="220" y="${160 - downHeight}" width="60" height="${downHeight}" fill="#ef4444" rx="4"/>
+        <rect x="220" y="${200 - downHeight}" width="60" height="${downHeight}" fill="#ef4444" rx="4"/>
         
         <!-- Labels -->
-        <text x="130" y="180" fill="#94a3b8" font-size="13" font-weight="600" text-anchor="middle">Done</text>
-        <text x="250" y="180" fill="#94a3b8" font-size="13" font-weight="600" text-anchor="middle">Received</text>
+        <text x="130" y="220" fill="#94a3b8" font-size="13" font-weight="600" text-anchor="middle">Done</text>
+        <text x="250" y="220" fill="#94a3b8" font-size="13" font-weight="600" text-anchor="middle">Received</text>
       </svg>
+      </div>
 
       <!-- Stats Display -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="text-center p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-          <div class="text-slate-400 text-sm mb-2">Done</div>
-          <div class="text-2xl font-bold text-emerald-400">
-            ${formatBytes(totalUp)}<span class="text-amber-400 text-lg"> + ${formatBytes(totalUpBonus)}</span>
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div class="text-center p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+          <div class="text-slate-400 text-xs mb-1">Done</div>
+          <div class="text-lg font-bold text-[#10CFC9]">
+            ${formatBytes(totalUp)}<span class="text-amber-400 text-sm"> + ${formatBytes(totalUpBonus)}</span>
           </div>
         </div>
-        <div class="text-center p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-          <div class="text-slate-400 text-sm mb-2">Received</div>
-          <div class="text-2xl font-bold text-rose-400">${formatBytes(totalDown)}</div>
+        <div class="text-center p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+          <div class="text-slate-400 text-xs mb-1">Received</div>
+          <div class="text-lg font-bold text-rose-400">${formatBytes(totalDown)}</div>
         </div>
       </div>
 
       <!-- Audit Ratio -->
-      <div class="text-center p-5 bg-sky-500/10 rounded-lg border border-sky-500/30">
-        <div class="text-5xl font-bold text-sky-400">${auditRatio.toFixed(1)} <span class="text-lg text-slate-300 font-medium ml-2">${getRatioMessage(auditRatio)}</span></div>
+      <div class="text-center p-4 mt-3 bg-[#10CFC9]/10 rounded-lg border border-[#10CFC9]/30">
+        <div class="text-4xl font-bold text-[#10CFC9]">${auditRatio.toFixed(1)} <span class="text-sm text-slate-300 font-medium ml-2">${getRatioMessage(auditRatio)}</span></div>
       </div>
     </div>
   `;
 }
 
-export function renderXPProgressChart(container, projects, currentLevel = 0) {
-  if (!projects || projects.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 text-center py-8">No project data available</p>';
+export function renderXPProgressChart(container, transactions, currentLevel = 0) {
+  if (!transactions || transactions.length === 0) {
+    container.innerHTML = '<p class="text-slate-400 text-center py-8">No XP data available</p>';
     return;
   }
 
-  // Calculate cumulative XP for each project
+  // Calculate cumulative XP for each transaction
   let cumulativeXP = 0;
-  const dataPoints = projects.map(project => {
-    cumulativeXP += project.amount;
+  const dataPoints = transactions.map(tx => {
+    cumulativeXP += tx.amount;
     return {
-      name: project.object.name,
-      date: new Date(project.createdAt),
+      name: tx.object.name,
+      date: new Date(tx.createdAt),
       xp: cumulativeXP,
-      earned: project.amount
+      earned: tx.amount
     };
   });
 
@@ -141,12 +143,12 @@ export function renderXPProgressChart(container, projects, currentLevel = 0) {
 
   container.innerHTML = `
     <div class="flex flex-col h-full">
-      <div class="relative">
-        <svg viewBox="0 0 ${w} ${h}" class="w-full">
+      <div class="relative flex-1">
+        <svg viewBox="0 0 ${w} ${h}" class="w-full h-full">
           <defs>
             <linearGradient id="xpGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+              <stop offset="0%" stop-color="#10CFC9" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#10CFC9" stop-opacity="0"/>
             </linearGradient>
           </defs>
           
@@ -159,7 +161,7 @@ export function renderXPProgressChart(container, projects, currentLevel = 0) {
           <path d="${linePath} L ${w - padding.right} ${padding.top + chartH} L ${padding.left} ${padding.top + chartH} Z" fill="url(#xpGrad)"/>
           
           <!-- Line -->
-          <path d="${linePath}" stroke="#8b5cf6" stroke-width="2.5" fill="none"/>
+          <path d="${linePath}" stroke="#10CFC9" stroke-width="2.5" fill="none"/>
           
           <!-- Data points -->
           ${dataPoints.map((pt) => {
@@ -170,10 +172,10 @@ export function renderXPProgressChart(container, projects, currentLevel = 0) {
             return `
               <circle 
                 cx="${cx}" cy="${cy}" r="4" 
-                fill="#8b5cf6" stroke="#1e293b" stroke-width="2"
+                fill="#10CFC9" stroke="#1e293b" stroke-width="2"
                 style="cursor: pointer; transition: all 0.2s;"
-                onmouseenter="this.setAttribute('r', '6'); this.setAttribute('fill', '#a78bfa'); document.getElementById('${tooltipId}').style.display='block'; document.getElementById('${tooltipId}').innerHTML='<strong>${escapedName}</strong><br/>+${(pt.earned / 1000).toFixed(1)} kB<br/>${dateStr}'"
-                onmouseleave="this.setAttribute('r', '4'); this.setAttribute('fill', '#8b5cf6'); document.getElementById('${tooltipId}').style.display='none'"
+                onmouseenter="this.setAttribute('r', '6'); this.setAttribute('fill', '#14E5DD'); document.getElementById('${tooltipId}').style.display='block'; document.getElementById('${tooltipId}').innerHTML='<strong>${escapedName}</strong><br/>+${(pt.earned / 1000).toFixed(1)} kB<br/>${dateStr}'"
+                onmouseleave="this.setAttribute('r', '4'); this.setAttribute('fill', '#10CFC9'); document.getElementById('${tooltipId}').style.display='none'"
               />
             `;
           }).join('')}
@@ -197,19 +199,15 @@ export function renderXPProgressChart(container, projects, currentLevel = 0) {
         </svg>
         
         <!-- Tooltip -->
-        <div id="${tooltipId}" class="absolute top-4 right-4 bg-slate-800 border border-purple-500/50 rounded-lg px-4 py-2 text-sm text-slate-200 shadow-lg pointer-events-none" style="display: none;"></div>
+        <div id="${tooltipId}" class="absolute top-4 right-4 bg-slate-800 border border-[#10CFC9]/50 rounded-lg px-4 py-2 text-sm text-slate-200 shadow-lg pointer-events-none" style="display: none;"></div>
       </div>
       
       <!-- Stats -->
-      <div class="flex justify-between items-center mt-4 p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
+      <div class="flex justify-between items-center mt-4 p-4 bg-[#10CFC9]/10 rounded-lg border border-[#10CFC9]/30">
         <div>
           <div class="text-sm text-slate-400">Current XP</div>
-          <div class="text-2xl font-bold text-purple-400">${(maxXP / 1000).toFixed(1)} kB</div>
-        </div>
-        <div class="text-center">
-          <div class="text-sm text-slate-400">Projects</div>
-          <div class="text-2xl font-bold text-slate-200">${projects.length}</div>
-        </div>
+          <div class="text-2xl font-bold text-[#10CFC9]">${(maxXP / 1000).toFixed(1)} kB</div>
+        </div>  
         <div class="text-right">
           <div class="text-sm text-slate-400">Level</div>
           <div class="text-2xl font-bold text-slate-200">${currentLevel}</div>

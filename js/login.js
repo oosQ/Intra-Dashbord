@@ -2,10 +2,20 @@ import { loginUser, isAuthenticated , logoutUser} from "./auth.js";
 
 const loginForm = document.getElementById("login-form");
 const errorMessage = document.getElementById("error-message");
+const passwordInput = document.getElementById("password");
+const togglePasswordBtn = document.getElementById("toggle-password");
+const passwordIcon = document.getElementById("password-icon");
 
 if (isAuthenticated()) {
   window.location.href = "./profile.html";
 }
+
+// Toggle password visibility
+togglePasswordBtn.addEventListener("click", () => {
+  const isPassword = passwordInput.type === "password";
+  passwordInput.type = isPassword ? "text" : "password";
+  passwordIcon.className = isPassword ? "fas fa-eye-slash" : "fas fa-eye";
+});
 
 // Login form submit handler
 loginForm.addEventListener("submit", async (event) => {

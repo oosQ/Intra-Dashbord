@@ -7,40 +7,65 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
-<body class="min-h-screen bg-slate-950 text-white">
+<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
   <div class="max-w-6xl mx-auto px-4 py-8">
     <header class="flex items-center justify-between mb-8">
       <div>
-        <h1 class="text-3xl font-bold">My Profile</h1>
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-[#10CFC9] to-[#14E5DD] bg-clip-text text-transparent">My Profile</h1>
         <p class="text-slate-400 mt-1">Hello Rebooter</p>
       </div>
 
       <button id="logout-btn"
-        class="rounded-xl bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-400 transition">
-        Logout
+        class="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-5 py-2.5 font-medium text-white hover:shadow-lg hover:shadow-red-500/30 transition transform hover:scale-105 duration-200">
+        <i class="fas fa-sign-out-alt mr-2"></i>Logout
       </button>
     </header>
 
-    <section id="loading-state" class="text-slate-400">
-      Loading profile data...
+    <!-- Loading State -->
+    <section id="loading-state" class="flex flex-col items-center justify-center min-h-[60vh]">
+      <div class="relative">
+        <svg class="animate-spin h-16 w-16 text-[#10CFC9]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <p class="mt-4 text-slate-400 text-lg">Loading profile data...</p>
     </section>
 
 
     <section id="profile-content" class="hidden space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div id="user-info-card" class="rounded-2xl border border-slate-800 bg-slate-900 p-6"></div>
-        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 class="text-xl font-semibold mb-4">Pass / Fail Ratio</h2>
-          <div id="pass-fail-chart"></div>
+
+        <div id="user-info-card" class="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 shadow-lg">
+          <!-- User info will be rendered here -->
         </div>
+
+          <div class="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 shadow-lg flex flex-col">
+            <h2 class="text-xl font-semibold mb-4">
+              <i class="fas fa-chart-bar mr-2 text-[#10CFC9]"></i>Pass / Fail Ratio
+            </h2>
+              <div id="pass-fail-chart" class="flex-1">
+              <!-- Pass/Fail chart will be rendered here -->
+              </div>
+          </div>
+
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div id="xp-card" class="rounded-2xl border border-slate-800 bg-slate-900 p-6"></div>
-        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6 md:col-span-3 flex flex-col">
-          <h2 class="text-xl font-semibold mb-4">XP Progress</h2>
-          <div id="xp-chart" class="flex-1"></div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <div id="xp-card" class="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 md:col-span-4 shadow-lg">
+          <!-- XP summary will be rendered here -->
         </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 md:col-span-8 flex flex-col shadow-lg">
+          <h2 class="text-xl font-semibold mb-4">
+            <i class="fas fa-chart-line mr-2 text-[#10CFC9]"></i>XP Progress
+          </h2>
+          <div id="xp-chart" class="flex-1">
+            <!-- XP progress graph will be rendered here -->
+          </div>
+        </div>
+
       </div>
 
     </section>
