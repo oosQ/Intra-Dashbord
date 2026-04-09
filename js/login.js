@@ -7,7 +7,7 @@ const togglePasswordBtn = document.getElementById("toggle-password");
 const passwordIcon = document.getElementById("password-icon");
 
 if (isAuthenticated()) {
-  window.location.href = "./profile.html";
+  window.location.replace("./profile.html");
 }
 
 // Toggle password visibility
@@ -38,7 +38,7 @@ loginForm.addEventListener("submit", async (event) => {
 
   try {
     await loginUser(usernameOrEmail, password);
-    window.location.href = "./profile.html";
+    window.location.replace("./profile.html");
   } catch (error) {
     errorMessage.textContent = error.message || "Login failed.";
   }

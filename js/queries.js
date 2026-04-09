@@ -30,7 +30,7 @@ export async function fetchQuery(query, variables = {}) {
     // Check if JWT has expired
     if (errorMessage.includes("JWTExpired") || errorMessage.includes("JWT") && errorMessage.includes("expired")) {
       removeToken();
-      window.location.href = "/index.html";
+      window.location.replace("./index.html");
       throw new Error("Your session has expired. Please log in again.");
     }
     

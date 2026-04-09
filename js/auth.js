@@ -48,5 +48,5 @@ export async function loginUser(usernameOrEmail, password) {
 
 export function logoutUser() {
   removeToken();
-  window.location.href = "./index.html";
+  window.location.replace("./index.html");
 }
